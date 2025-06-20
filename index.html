@@ -1,1 +1,550 @@
-<!-- Paste your app HTML code here -->
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>កម្មវិធីកត់ត្រាកិច្ចប្រជុំឆ្លាតវៃ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        .pulse {
+            animation: pulse-animation 1.5s infinite;
+        }
+        @keyframes pulse-animation {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #6366f1;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-700">កម្មវិធីកត់ត្រាកិច្ចប្រជុំឆ្លាតវៃ</h1>
+            <p class="text-slate-500 mt-2">បំពាក់ដោយ Gemini API ដើម្បីសង្ខេប និងដកស្រង់កិច្ចការ</p>
+        </header>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Main Content: Note Editor -->
+            <main class="w-full lg:w-2/3 bg-white p-6 rounded-xl shadow-lg">
+                <div id="note-editor">
+                    <h2 class="text-2xl font-semibold mb-4 border-b pb-2">កែសម្រួលកំណត់ត្រា</h2>
+                    
+                    <input type="hidden" id="current-note-id">
+
+                    <div class="mb-4">
+                        <label for="meeting-title" class="block text-sm font-medium text-slate-600 mb-1">ប្រធានបទកិច្ចប្រជុំ</label>
+                        <input type="text" id="meeting-title" placeholder="ឧ. កិច្ចប្រជុំប្រចាំត្រីមាស" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="meeting-attendees" class="block text-sm font-medium text-slate-600 mb-1">អ្នកចូលរួម</label>
+                            <input type="text" id="meeting-attendees" placeholder="ឧ. សុខ, ចាន់ណា" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                        </div>
+                        <div>
+                            <label for="meeting-date" class="block text-sm font-medium text-slate-600 mb-1">កាលបរិច្ឆេទ</label>
+                            <input type="date" id="meeting-date" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="transcript-output" class="block text-sm font-medium text-slate-600 mb-1">កំណត់ត្រា (អត្ថបទដែលបានបំប្លែង)</label>
+                        <textarea id="transcript-output" rows="10" placeholder="អត្ថបទដែលបានបំប្លែងពីសំឡេងនឹងបង្ហាញនៅទីនេះ..." class="w-full p-3 border border-slate-300 rounded-lg custom-scrollbar focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></textarea>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-4 flex-wrap border-b pb-4 mb-4">
+                        <div class="flex items-center gap-4">
+                            <button id="start-btn" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 active:bg-blue-800 transition shadow-md flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-mic-fill" viewBox="0 0 16 16">
+                                  <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0V3z"/>
+                                  <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
+                                </svg>
+                                <span id="start-btn-text">ចាប់ផ្តើមថតសំឡេង</span>
+                            </button>
+                            <div id="status" class="text-sm text-slate-500"></div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                             <button id="new-note-btn" class="px-4 py-2 bg-slate-200 text-slate-800 font-semibold rounded-lg hover:bg-slate-300 transition">
+                                កំណត់ត្រាថ្មី
+                            </button>
+                            <button id="save-btn" class="px-6 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 active:bg-green-800 transition shadow-md">
+                                រក្សាទុក
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Gemini AI Features -->
+                    <div id="gemini-features">
+                        <h3 class="text-lg font-semibold text-slate-700 mb-3">មុខងារឆ្លាតវៃ ✨</h3>
+                        <div class="flex flex-wrap gap-3 mb-4">
+                            <button id="summarize-btn" class="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition flex items-center gap-2">
+                                ✨ សង្ខេបកិច្ចប្រជុំ
+                            </button>
+                            <button id="action-items-btn" class="px-4 py-2 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 transition flex items-center gap-2">
+                                ✨ ដកស្រង់កិច្ចការ
+                            </button>
+                        </div>
+                        <div id="gemini-output-container" class="bg-indigo-50 p-4 rounded-lg border border-indigo-200 hidden">
+                             <h4 id="gemini-output-title" class="font-bold text-indigo-800 mb-2"></h4>
+                             <div id="gemini-output-content" class="text-slate-700 prose prose-sm max-w-none"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+
+            <!-- Sidebar: Saved Notes -->
+            <aside class="w-full lg:w-1/3 bg-white p-6 rounded-xl shadow-lg">
+                <h2 class="text-2xl font-semibold mb-4 border-b pb-2">កំណត់ត្រាដែលបានរក្សាទុក</h2>
+                <div id="saved-notes-list" class="space-y-3 h-[450px] overflow-y-auto custom-scrollbar pr-2">
+                    <p class="text-slate-400">មិនទាន់មានកំណត់ត្រា...</p>
+                </div>
+            </aside>
+        </div>
+        
+        <footer class="text-center mt-8 text-slate-400 text-sm">
+            <p>UserID: <span id="user-id-display"></span></p>
+        </footer>
+    </div>
+    
+    <!-- Custom Modal -->
+    <div id="custom-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full mx-4">
+            <h3 id="modal-title" class="text-lg font-bold mb-4"></h3>
+            <p id="modal-message" class="mb-6"></p>
+            <div id="modal-buttons" class="text-right space-x-2">
+                <button id="modal-cancel-btn" class="px-4 py-2 bg-slate-300 text-slate-800 rounded-lg hover:bg-slate-400">បោះបង់</button>
+                <button id="modal-confirm-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">យល់ព្រម</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="module">
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, addDoc, onSnapshot, collection, deleteDoc, updateDoc, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Firebase Configuration ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "your-fallback-api-key", authDomain: "your-fallback-auth-domain", projectId: "your-fallback-project-id" };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-smart-notes-kh';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        let userId = null;
+        let unsubscribeNotes = null;
+
+        // --- DOM Elements ---
+        const startBtn = document.getElementById('start-btn');
+        const startBtnText = document.getElementById('start-btn-text');
+        const saveBtn = document.getElementById('save-btn');
+        const newNoteBtn = document.getElementById('new-note-btn');
+        const statusDiv = document.getElementById('status');
+        const transcriptOutput = document.getElementById('transcript-output');
+        const meetingTitleInput = document.getElementById('meeting-title');
+        const meetingAttendeesInput = document.getElementById('meeting-attendees');
+        const meetingDateInput = document.getElementById('meeting-date');
+        const savedNotesList = document.getElementById('saved-notes-list');
+        const currentNoteIdInput = document.getElementById('current-note-id');
+        const userIdDisplay = document.getElementById('user-id-display');
+        
+        // Modal Elements
+        const customModal = document.getElementById('custom-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+        const modalCancelBtn = document.getElementById('modal-cancel-btn');
+        let confirmCallback = null;
+
+        // Gemini AI Elements
+        const summarizeBtn = document.getElementById('summarize-btn');
+        const actionItemsBtn = document.getElementById('action-items-btn');
+        const geminiOutputContainer = document.getElementById('gemini-output-container');
+        const geminiOutputTitle = document.getElementById('gemini-output-title');
+        const geminiOutputContent = document.getElementById('gemini-output-content');
+
+
+        // --- Speech Recognition Setup ---
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+        let isRecording = false;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'km-KH'; // Set language to Khmer
+
+            recognition.onstart = () => {
+                isRecording = true;
+                statusDiv.textContent = 'កំពុងស្តាប់...';
+                startBtnText.textContent = 'បញ្ឈប់ការថតសំឡេង';
+                startBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'pulse');
+                startBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            };
+
+            recognition.onend = () => {
+                isRecording = false;
+                statusDiv.textContent = 'ចុចប៊ូតុងដើម្បីចាប់ផ្តើម';
+                startBtnText.textContent = 'ចាប់ផ្តើមថតសំឡេង';
+                startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'pulse');
+                startBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            };
+
+            recognition.onresult = (event) => {
+                let finalTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    }
+                }
+                if (finalTranscript.trim()) {
+                    transcriptOutput.value += finalTranscript + '។ ';
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                let errorMessage = `មានបញ្ហា៖ ${event.error}`;
+                if (event.error === 'not-allowed') {
+                    errorMessage = 'កម្មវិធីមិនអាចចូលប្រើមីក្រូហ្វូនបានទេ។ សូមប្រាកដថាអ្នកបានអនុញ្ញាតឱ្យគេហទំព័រនេះប្រើមីក្រូហ្វូនរបស់អ្នកនៅក្នុងការកំណត់កម្មវិធីរុករក។ អ្នកប្រហែលជាត្រូវផ្ទុកទំព័រឡើងវិញបន្ទាប់ពីបានផ្តល់សិទ្ធិ។';
+                } else if (event.error === 'no-speech') {
+                    errorMessage = 'មិនបានរកឃើញសំឡេងទេ។ សូមព្យាយាមម្តងទៀត។';
+                }
+                showModal('បញ្ហាជាមួយការសម្គាល់សំឡេង', errorMessage);
+                isRecording = false;
+            };
+        } else {
+            showModal('កម្មវិធីរុករកមិនគាំទ្រ', 'សូមអភ័យទោស! កម្មវិធីរុករករបស់អ្នកមិនគាំទ្រមុខងារបំប្លែងសំឡេងទៅជាអក្សរទេ។');
+            startBtn.disabled = true;
+        }
+
+        // --- Event Listeners ---
+        startBtn.addEventListener('click', () => {
+            if (!SpeechRecognition) return;
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                try {
+                   recognition.start();
+                } catch(e) {
+                   console.error("Error starting recognition:", e);
+                   showModal('បញ្ហាក្នុងការចាប់ផ្តើម', 'មិនអាចចាប់ផ្តើមការថតសំឡេងបានទេ។ សូមប្រាកដថាមិនមានកម្មវិធីផ្សេងទៀតកំពុងប្រើប្រាស់មីក្រូហ្វូន។');
+                }
+            }
+        });
+        
+        saveBtn.addEventListener('click', saveNote);
+        newNoteBtn.addEventListener('click', clearEditor);
+        modalCancelBtn.addEventListener('click', () => customModal.classList.add('hidden'));
+        modalConfirmBtn.addEventListener('click', () => {
+            customModal.classList.add('hidden');
+            if (confirmCallback) {
+                confirmCallback();
+                confirmCallback = null;
+            }
+        });
+
+        summarizeBtn.addEventListener('click', () => {
+            const transcript = transcriptOutput.value;
+            if (transcript.trim() === "") {
+                showModal('ត្រូវការអត្ថបទ', 'សូមបញ្ចូលអត្ថបទកំណត់ត្រាជាមុនសិន មុននឹងសង្ខេប។');
+                return;
+            }
+            const prompt = `ផ្អែកលើកំណត់ត្រាកិច្ចប្រជុំខាងក្រោម សូមបង្កើតសេចក្តីសង្ខេបខ្លីៗជាចំណុចៗ (bullet points) ជាភាសាខ្មែរ។\n\nកំណត់ត្រា៖\n"${transcript}"`;
+            callGeminiAPI(prompt, "សេចក្តីសង្ខេបកិច្ចប្រជុំ");
+        });
+
+        actionItemsBtn.addEventListener('click', () => {
+            const transcript = transcriptOutput.value;
+            if (transcript.trim() === "") {
+                showModal('ត្រូវការអត្ថបទ', 'សូមបញ្ចូលអត្ថបទកំណត់ត្រាជាមុនសិន មុននឹងដកស្រង់កិច្ចការ។');
+                return;
+            }
+            const prompt = `ពីកំណត់ត្រាកិច្ចប្រជុំខាងក្រោម សូមដកស្រង់ចំណុចសកម្មភាព កិច្ចការដែលត្រូវធ្វើ ឬការសម្រេចចិត្តសំខាន់ៗ។ បង្ហាញលទ្ធផលជាបញ្ជីចំណុចៗ (bullet points) ដែលមានសញ្ញាធីក ☐ នៅពីមុខ។ ប្រើភាសាខ្មែរ។\n\nកំណត់ត្រា៖\n"${transcript}"`;
+            callGeminiAPI(prompt, "កិច្ចការត្រូវធ្វើ");
+        });
+
+
+        // --- Functions ---
+        
+        async function callGeminiAPI(prompt, title) {
+            geminiOutputContainer.classList.remove('hidden');
+            geminiOutputTitle.textContent = title;
+            geminiOutputContent.innerHTML = '<div class="flex items-center gap-2"><div class="loader"></div><p>កំពុងដំណើរការ... សូមរង់ចាំបន្តិច។</p></div>';
+
+            const apiKey = "AIzaSyCClhaA_ZZXVWxEmffglN-J7HW0wjBEPI8"; // Will be replaced by the environment
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [{ role: "user", parts: [{ text: prompt }] }]
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                     const errorData = await response.json();
+                     throw new Error(`API Error: ${response.status} ${response.statusText}. ${errorData.error?.message || ''}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    // Basic Markdown to HTML conversion for lists
+                    const formattedText = text
+                        .split('\n')
+                        .map(line => line.trim())
+                        .filter(line => line)
+                        .map(line => {
+                            if (line.startsWith('* ') || line.startsWith('- ')) {
+                                return `<li>${line.substring(2)}</li>`;
+                            }
+                             if (line.startsWith('☐')) {
+                                return `<li>${line}</li>`;
+                            }
+                            return `<li>${line}</li>`;
+                        })
+                        .join('');
+                    geminiOutputContent.innerHTML = `<ul class="list-disc pl-5 space-y-1">${formattedText}</ul>`;
+                } else {
+                    throw new Error('ការឆ្លើយតបពី API មិនត្រឹមត្រូវ');
+                }
+
+            } catch(error) {
+                console.error("Gemini API call failed:", error);
+                geminiOutputContent.innerHTML = `<p class="text-red-600">មានបញ្ហាក្នុងការបង្កើតខ្លឹមសារ៖ ${error.message}</p>`;
+            }
+        }
+
+
+        function showModal(title, message, isConfirmation = false, onConfirm = null) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            confirmCallback = onConfirm;
+
+            if (isConfirmation) {
+                modalConfirmBtn.textContent = 'បញ្ជាក់';
+                modalConfirmBtn.classList.remove('bg-blue-600');
+                modalConfirmBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                modalCancelBtn.classList.remove('hidden');
+            } else {
+                modalConfirmBtn.textContent = 'យល់ព្រម';
+                modalConfirmBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                modalConfirmBtn.classList.add('bg-blue-600');
+                modalCancelBtn.classList.add('hidden');
+            }
+            
+            customModal.classList.remove('hidden');
+            customModal.classList.add('flex');
+        }
+
+        function clearEditor() {
+            currentNoteIdInput.value = '';
+            meetingTitleInput.value = '';
+            meetingAttendeesInput.value = '';
+            transcriptOutput.value = '';
+            meetingDateInput.valueAsDate = new Date();
+            geminiOutputContainer.classList.add('hidden');
+            geminiOutputContent.innerHTML = '';
+            meetingTitleInput.focus();
+        }
+
+        async function saveNote() {
+            if (!userId) {
+                showModal('មិនអាចរក្សាទុកបានទេ', 'អ្នកប្រើប្រាស់មិនទាន់បានផ្ទៀងផ្ទាត់ទេ។ សូមព្យាយាមម្តងទៀត។');
+                return;
+            }
+
+            const title = meetingTitleInput.value.trim();
+            if (!title) {
+                showModal('ត្រូវការប្រធានបទ', 'សូមបញ្ចូលប្រធានបទសម្រាប់កំណត់ត្រារបស់អ្នក។');
+                return;
+            }
+
+            const noteData = {
+                userId: userId,
+                title: title,
+                attendees: meetingAttendeesInput.value.trim(),
+                date: meetingDateInput.value,
+                transcript: transcriptOutput.value.trim(),
+                updatedAt: serverTimestamp()
+            };
+
+            const noteId = currentNoteIdInput.value;
+
+            try {
+                if (noteId) {
+                    const noteRef = doc(db, `artifacts/${appId}/public/data/meetings`, noteId);
+                    await updateDoc(noteRef, noteData);
+                    showModal('បានធ្វើបច្ចុប្បន្នភាព', 'កំណត់ត្រារបស់អ្នកត្រូវបានធ្វើបច្ចុប្បន្នភាពដោយជោគជ័យ។');
+                } else {
+                    noteData.createdAt = serverTimestamp();
+                    const collectionRef = collection(db, `artifacts/${appId}/public/data/meetings`);
+                    await addDoc(collectionRef, noteData);
+                    showModal('បានរក្សាទុក', 'កំណត់ត្រារបស់អ្នកត្រូវបានរក្សាទុកដោយជោគជ័យ។');
+                }
+                clearEditor();
+            } catch (error) {
+                console.error("Error saving note: ", error);
+                showModal('មានបញ្ហា', 'មិនអាចរក្សាទុកកំណត់ត្រាបានទេ។ សូមពិនិត្យមើល console សម្រាប់ព័ត៌មានលម្អិត។');
+            }
+        }
+
+        function fetchAndDisplayNotes() {
+            if (unsubscribeNotes) {
+                unsubscribeNotes();
+            }
+
+            const notesCollectionRef = collection(db, `artifacts/${appId}/public/data/meetings`);
+            const q = query(notesCollectionRef, where("userId", "==", userId));
+
+            unsubscribeNotes = onSnapshot(q, (querySnapshot) => {
+                if (querySnapshot.empty) {
+                    savedNotesList.innerHTML = '<p class="text-slate-400">មិនទាន់មានកំណត់ត្រា...</p>';
+                    return;
+                }
+
+                savedNotesList.innerHTML = '';
+                let notes = [];
+                querySnapshot.forEach((doc) => {
+                    notes.push({ id: doc.id, ...doc.data() });
+                });
+                
+                notes.sort((a,b) => {
+                    const dateA = a.updatedAt?.toDate() || new Date(0);
+                    const dateB = b.updatedAt?.toDate() || new Date(0);
+                    return dateB - dateA;
+                });
+
+                notes.forEach(note => {
+                    const noteElement = document.createElement('div');
+                    noteElement.className = 'p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition';
+                    
+                    const noteDate = note.date ? new Date(note.date).toLocaleDateString('km-KH', { year: 'numeric', month: 'long', day: 'numeric'}) : 'មិនមានកាលបរិច្ឆេទ';
+
+                    noteElement.innerHTML = `
+                        <div class="flex justify-between items-start">
+                             <div>
+                                <h4 class="font-bold text-slate-700">${note.title}</h4>
+                                <p class="text-sm text-slate-500">${noteDate}</p>
+                            </div>
+                            <button data-id="${note.id}" class="delete-btn text-red-400 hover:text-red-600 font-bold p-1 leading-none text-xl">&times;</button>
+                        </div>
+                    `;
+                    
+                    noteElement.addEventListener('click', (e) => {
+                         if (e.target.classList.contains('delete-btn')) return;
+                         loadNoteForEditing(note);
+                    });
+
+                    noteElement.querySelector('.delete-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const idToDelete = e.target.getAttribute('data-id');
+                        showModal(
+                            'បញ្ជាក់ការលុប',
+                            'តើអ្នកពិតជាចង់លុបកំណត់ត្រានេះមែនទេ? សកម្មភាពនេះមិនអាចមិនធ្វើវិញបានទេ។',
+                            true, // This is a confirmation modal
+                            async () => { // This function runs if user clicks "Confirm"
+                                try {
+                                    await deleteDoc(doc(db, `artifacts/${appId}/public/data/meetings`, idToDelete));
+                                    showModal('បានលុប', 'កំណត់ត្រាត្រូវបានលុបដោយជោគជ័យ។');
+                                    if (currentNoteIdInput.value === idToDelete) {
+                                      clearEditor();
+                                    }
+                                } catch (error) {
+                                    console.error("Error deleting note: ", error);
+                                    showModal('បញ្ហាក្នុងការលុប', 'មិនអាចលុបកំណត់ត្រាបានទេ។');
+                                }
+                            }
+                        );
+                    });
+
+
+                    savedNotesList.appendChild(noteElement);
+                });
+            }, (error) => {
+                console.error("Error fetching notes:", error);
+                savedNotesList.innerHTML = '<p class="text-red-500">មិនអាចទាញយកកំណត់ត្រាបានទេ។</p>';
+            });
+        }
+        
+        function loadNoteForEditing(note) {
+            clearEditor(); // Clear previous AI content
+            currentNoteIdInput.value = note.id;
+            meetingTitleInput.value = note.title;
+            meetingAttendeesInput.value = note.attendees || '';
+            meetingDateInput.value = note.date || '';
+            transcriptOutput.value = note.transcript || '';
+        }
+
+        // --- Initialization on Load ---
+        window.onload = () => {
+             clearEditor();
+
+             onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                    userIdDisplay.textContent = userId;
+                    fetchAndDisplayNotes();
+                } else {
+                    try {
+                        if (initialAuthToken) {
+                            await signInWithCustomToken(auth, initialAuthToken);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    } catch (error) {
+                        console.error("Authentication failed:", error);
+                        userIdDisplay.textContent = "Authentication Failed";
+                        showModal('បញ្ហា Authentication', 'មិនអាចផ្ទៀងផ្ទាត់អ្នកប្រើប្រាស់បានទេ។');
+                    }
+                }
+            });
+        };
+
+    </script>
+</body>
+</html>
